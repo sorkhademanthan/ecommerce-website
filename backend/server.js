@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js'; // Import product routes
 import userRoutes from './routes/userRoutes.js'; // Import user routes
+import orderRoutes from '/routes/orderRoutes.js'
 
 dotenv.config();
 connectDB();
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/products', productRoutes); // Mount the routes
 app.use('/api/users', userRoutes); // Mount the routes
+app.use('/api/orders', orderRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -11,6 +11,7 @@ const CartScreen = () => {
   const dispatch = useAppDispatch();
 
   const { cartItems } = useAppSelector((state) => state.cart);
+  const { userInfo } = useAppSelector((state) => state.auth);
 
   const addToCartHandler = (product: CartItem, qty: number) => {
     dispatch(addToCart({ ...product, qty }));
@@ -21,7 +22,11 @@ const CartScreen = () => {
   };
 
   const checkoutHandler = () => {
-    navigate('/login?redirect=/shipping');
+    if (userInfo) {
+      navigate('/shipping');
+    } else {
+      navigate('/login?redirect=/shipping');
+    }
   };
 
   return (

@@ -18,6 +18,9 @@ import store from './store';
 import PrivateRoute from './components/PrivateRoute.tsx';
 import ProfileScreen from './screens/ProfileScreen.tsx';
 import CartScreen from './screens/CartScreen.tsx';
+import ShippingScreen from './screens/ShippingScreen.tsx';
+import PaymentScreen from './screens/PaymentScreen.tsx';
+import PlaceOrderScreen from './screens/PlaceOrderScreen.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,6 +35,9 @@ const router = createBrowserRouter(
       {/* Private Routes */}
       <Route path="" element={<PrivateRoute />}>
         <Route path="/profile" element={<ProfileScreen />} />
+        <Route path="/shipping" element={<ShippingScreen />} /> 
+        <Route path='/payment' element={<PaymentScreen/>}/>
+        <Route path="/placeorder" element={<PlaceOrderScreen />} />
       </Route>
     </Route>
   )

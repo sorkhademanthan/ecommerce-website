@@ -1,33 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
-import axios from 'axios';
-import type { Product as ProductType } from '../types'; // Import our type
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Product from '../components/Product';
-// We will create the Product component next
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { fetchProducts } from '../slices/productsSlice';
 
 const HomeScreen = () => {
-  const [products, setProducts] = useState<ProductType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { products, loading, error } = useAppSelector(
+    (state) => state.products
+  );
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const { data } = await axios.get<ProductType[]>('/api/products');
-        setProducts(data);
-        setLoading(false);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'An unexpected error occurred';
-        setError(message);
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   return (
     <>

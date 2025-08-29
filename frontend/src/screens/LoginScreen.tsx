@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Loader from '../components/Loader';
@@ -13,15 +13,19 @@ const LoginScreen = () => {
 
   const dispatch = useAppDispatch(); // <-- Fix 3: Use the typed dispatch hook
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirect = searchParams.get('redirect') || '/';
 
   // The 'state' parameter is now correctly typed
   const { userInfo, loading, error } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      navigate(redirect);
     }
-  }, [navigate, userInfo]);
+  }, [navigate, userInfo, redirect]);
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => { // <-- Fix 4: Removed unnecessary 'async'
     e.preventDefault();
@@ -52,6 +56,7 @@ const LoginScreen = () => {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
           ></Form.Control>
         </Form.Group>
         <Button type="submit" variant="primary" className='mt-2'>
@@ -60,7 +65,7 @@ const LoginScreen = () => {
       </Form>
       <Row className="py-3">
         <Col>
-          New Customer? <Link to="/register">Register</Link>
+          New Customer? <Link to={`/register?redirect=${encodeURIComponent(redirect)}`}>Register</Link>
         </Col>
       </Row>
     </FormContainer>

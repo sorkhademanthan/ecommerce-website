@@ -1,16 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { CartItem } from '../types'; // You will need to define this type
+import type { CartItem, ShippingAddress } from '../types'; 
 
 interface CartState {
   cartItems: CartItem[];
+  shippingAddress: ShippingAddress;
+  paymentMethod: string; 
 }
 
 // Function to get cart from localStorage
 const cartItemsFromStorageString = localStorage.getItem('cart');
 const cartItemsFromStorage = cartItemsFromStorageString
   ? (JSON.parse(cartItemsFromStorageString) as CartState)
-  : { cartItems: [] };
+  : { 
+      cartItems: [], 
+      shippingAddress: { address: '', city: '', postalCode: '', country: '' }, 
+      paymentMethod: 'PayPal' 
+    };
 
 const initialState: CartState = cartItemsFromStorage;
 
@@ -40,8 +46,20 @@ const cartSlice = createSlice({
       // Save to localStorage
       localStorage.setItem('cart', JSON.stringify(state));
     },
+    saveShippingAddress: (state, action: PayloadAction<ShippingAddress>) => {
+        state.shippingAddress = action.payload;
+        localStorage.setItem('cart', JSON.stringify(state));
+    },
+    savePaymentMethod: (state, action: PayloadAction<string>) => {
+        state.paymentMethod = action.payload;
+        localStorage.setItem('cart', JSON.stringify(state));
+    },
+    clearCartItems: (state) => {
+        state.cartItems = [];
+        localStorage.setItem('cart', JSON.stringify(state));
+      },
   },
 });
 
-export const { addToCart, removeFromCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, saveShippingAddress, savePaymentMethod, clearCartItems } = cartSlice.actions;
 export default cartSlice.reducer;

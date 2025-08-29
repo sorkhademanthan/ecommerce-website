@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Message from '../components/Message'; // For displaying error messages
@@ -17,14 +17,18 @@ const RegisterScreen = () => {
   
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirect = searchParams.get('redirect') || '/';
 
   const { userInfo, loading, error } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      navigate(redirect);
     }
-  }, [navigate, userInfo]);
+  }, [navigate, userInfo, redirect]);
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,6 +76,7 @@ const RegisterScreen = () => {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
           ></Form.Control>
         </Form.Group>
 
@@ -82,6 +87,7 @@ const RegisterScreen = () => {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
           ></Form.Control>
         </Form.Group>
 
@@ -92,7 +98,7 @@ const RegisterScreen = () => {
 
       <Row className="py-3">
         <Col>
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account? <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>Login</Link>
         </Col>
       </Row>
     </FormContainer>
