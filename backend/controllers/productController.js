@@ -1,4 +1,5 @@
-import Product from '../models/product.models.js'; // Corrected import path
+// CORRECT
+import Product from '../models/productModel.js';// Corrected import path
 
 // @desc    Fetch all products
 // @route   GET /api/products

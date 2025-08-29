@@ -4,6 +4,7 @@ import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
 import { useAppSelector } from '../hooks';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Message from '../components/Message';
+// For now, the component's only job is to display the summary.
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
@@ -18,6 +19,11 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress, navigate]);
 
+  const placeOrderHandler = async () => {
+    // This is the placeholder we will build upon in the next step
+    console.log('place order');
+  };
+
   // Calculate prices
   const itemsPrice = cart.cartItems.reduce(
     (acc, item) => acc + item.price * item.qty,
@@ -26,11 +32,6 @@ const PlaceOrderScreen = () => {
   const shippingPrice = itemsPrice > 100 ? 0 : 10;
   const taxPrice = 0.15 * itemsPrice;
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
-
-  const placeOrderHandler = async () => {
-    console.log('place order');
-    // We will dispatch the create order action here in the next step
-  };
 
   return (
     <>
@@ -58,7 +59,6 @@ const PlaceOrderScreen = () => {
               ) : (
                 <ListGroup variant="flush">
                   {cart.cartItems.map((item, index) => (
-                    // Fix 1: Completed the Order Items display
                     <ListGroup.Item key={index}>
                       <Row>
                         <Col md={1}>
@@ -90,7 +90,6 @@ const PlaceOrderScreen = () => {
                   <Col>${itemsPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
-              {/* Fix 2: Added missing summary rows */}
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping:</Col>
