@@ -130,23 +130,24 @@ const authSlice = createSlice({
 
 export const updateUserProfile = createAsyncThunk<
   UserInfo,
-  Partial<UserInfo & { password?: string }>, // The data we send can be partial
-  { rejectValue: string; state: { auth: AuthState } } // We need access to the state
+  Partial<UserInfo & { password?: string }>,
+  { rejectValue: string; state: { auth: AuthState } }
 >('auth/updateProfile', async (user, { getState, rejectWithValue }) => {
   try {
-    // Get userInfo from the Redux state to access the token
+    // 1. Get the current state to access userInfo
     const { userInfo } = getState().auth;
 
     const config = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${userInfo?.token}`, // Add the token here
+        // 2. Add the Authorization header with the Bearer token
+        Authorization: `Bearer ${userInfo?.token}`,
       },
     };
 
+    // 3. Make the authenticated PUT request
     const { data } = await axios.put<UserInfo>(`/api/users/profile`, user, config);
 
-    // Update localStorage with the new user info
     localStorage.setItem('userInfo', JSON.stringify(data));
     return data;
   } catch (error) {

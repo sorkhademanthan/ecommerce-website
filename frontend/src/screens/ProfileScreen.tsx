@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
-import { useAppSelector } from '../hooks';
+import { useAppSelector, useAppDispatch } from '../hooks';
+import { updateUserProfile } from '../slices/authSlice';
 
 const ProfileScreen = () => {
   const [name, setName] = useState('');
@@ -9,6 +10,7 @@ const ProfileScreen = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const dispatch = useAppDispatch();
   const { userInfo } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -22,13 +24,25 @@ const ProfileScreen = () => {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      // We will add a toast notification for this later
-      console.log('Passwords do not match');
+      // We'll add a better notification (toast) later
+      alert('Passwords do not match');
     } else {
-      // We will dispatch the update profile action here
-      console.log('submit');
+      // Fix: import and use dispatch and updateUserProfile
+      // Import useDispatch and updateUserProfile at the top of the file:
+      // import { useDispatch } from 'react-redux';
+      // import { updateUserProfile } from '../slices/userSlice';
+      // Now dispatch the action:
+      // Only include password if it is not empty
+      const updateData: { name: string; email: string; password?: string } = { name, email };
+      if (password) {
+        updateData.password = password;
+      }
+      dispatch(updateUserProfile(updateData));
+      // We can add a "Profile Updated!" success message here later
+      // (Make sure to define and use dispatch properly)
     }
   };
+   
 
   return (
     <FormContainer>

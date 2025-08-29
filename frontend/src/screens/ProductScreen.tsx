@@ -1,49 +1,54 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { Row, Col, Image, ListGroup, Card, Button } from 'react-bootstrap';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { Row, Col, Image, Form, ListGroup, Card, Button } from 'react-bootstrap';
 import axios from 'axios';
 import type { Product as ProductType } from '../types';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Rating from '../components/Rating';
-// We will create the Rating component next
+import { useAppDispatch } from '../hooks';
+import { addToCart } from '../slices/cartSlice';
 
 const ProductScreen = () => {
-  // Get the productId from the URL. Note the name 'id' matches the ':id' in our route
-  const { id: productId } = useParams<{ id: string }>();
+  const { id: productId } = useParams();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [qty, setQty] = useState(1); // <-- 1. Add state for quantity
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        if (!productId) {
-          setError('Invalid product ID');
-          return;
-        }
         setLoading(true);
-        // Make the API call to our backend endpoint for a single product
         const { data } = await axios.get(`/api/products/${productId}`);
         setProduct(data);
       } catch (err: unknown) {
-        const message = axios.isAxiosError(err)
-          ? err.response?.data?.message || err.message
-          : err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred';
+        let message = 'An error occurred';
+        if (axios.isAxiosError(err)) {
+          const data = err.response?.data as { message?: string } | undefined;
+          message = data?.message ?? err.message;
+        } else if (err instanceof Error) {
+          message = err.message;
+        }
         setError(message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProduct();
-  }, [productId]); // The effect will re-run if the productId changes
+  }, [productId]);
 
-  // We will add the UI in Step 4
+  const addToCartHandler = () => {
+    if (product) {
+      // Use the 'qty' from state
+      dispatch(addToCart({ ...product, qty }));
+      navigate('/cart');
+    }
+  };
+
   return (
     <>
       <Link className="btn btn-light my-3" to="/">
@@ -55,6 +60,7 @@ const ProductScreen = () => {
         <Message variant="danger">{error}</Message>
       ) : product ? (
         <Row>
+          {/* ... Left and Middle Columns for Image and Details ... */}
           <Col md={5}>
             <Image src={product.image} alt={product.name} fluid />
           </Col>
@@ -89,11 +95,35 @@ const ProductScreen = () => {
                     </Col>
                   </Row>
                 </ListGroup.Item>
+
+                {/* <-- 2. Add Quantity Selector UI --> */}
+                {product.countInStock > 0 && (
+                  <ListGroup.Item>
+                    <Row>
+                      <Col>Qty</Col>
+                      <Col>
+                        <Form.Control
+                          as="select"
+                          value={qty}
+                          onChange={(e) => setQty(Number(e.target.value))}
+                        >
+                          {[...Array(product.countInStock).keys()].map((x) => (
+                            <option key={x + 1} value={x + 1}>
+                              {x + 1}
+                            </option>
+                          ))}
+                        </Form.Control>
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                )}
+
                 <ListGroup.Item>
                   <Button
                     className="btn-block"
                     type="button"
                     disabled={product.countInStock === 0}
+                    onClick={addToCartHandler} // <-- 3. Connect the handler
                   >
                     Add To Cart
                   </Button>

@@ -11,3 +11,13 @@ export type Product = {
     rating: number;
     numReviews: number;
   };
+
+  // in src/types/index.ts
+export type CartItem = {
+  _id: string;
+  name: string;
+  image: string;
+  price: number;
+  countInStock: number;
+  qty: number;
+};
