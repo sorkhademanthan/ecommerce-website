@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { CartItem, ShippingAddress } from '../types'; 
+import { logout } from './authSlice';
 
 interface CartState {
   cartItems: CartItem[];
@@ -58,6 +59,13 @@ const cartSlice = createSlice({
         state.cartItems = [];
         localStorage.setItem('cart', JSON.stringify(state));
       },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      // Clear the cart and remove it from localStorage
+      state.cartItems = [];
+      localStorage.removeItem('cart');
+    });
   },
 });
 

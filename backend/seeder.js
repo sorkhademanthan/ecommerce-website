@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import users from './data/users.js'; // Assuming you have a users.js in data folder
-import products from './data.js'; // Using the data.js file
-import User from './models/user.models.js';
-import Product from './models/product.models.js';
+import bcrypt from 'bcryptjs'; // 1. Import bcrypt
+import users from './data/users.js';
+import products from './data.js';
+import User from './models/userModel.js';
+import Product from './models/productModel.js';
 import connectDB from './config/db.js';
 
 dotenv.config();
@@ -14,7 +15,15 @@ const importData = async () => {
     await Product.deleteMany();
     await User.deleteMany();
 
-    const createdUsers = await User.insertMany(users);
+    // 2. Hash passwords before inserting users
+    const createdUsers = await User.insertMany(
+      users.map(user => {
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(user.password, salt);
+        return { ...user, password: hashedPassword };
+      })
+    );
+
     const adminUser = createdUsers[0]._id;
 
     const sampleProducts = products.map((product) => {
@@ -23,7 +32,7 @@ const importData = async () => {
 
     await Product.insertMany(sampleProducts);
 
-    console.log('Data Imported!');
+    console.log('Data Imported with Hashed Passwords!');
     process.exit();
   } catch (error) {
     console.error(`${error}`);
@@ -32,15 +41,15 @@ const importData = async () => {
 };
 
 const destroyData = async () => {
-    try {
-        await Product.deleteMany();
-        await User.deleteMany();
-        console.log('Data Destroyed!');
-        process.exit();
-    } catch (error) {
-        console.error(`${error}`);
-        process.exit(1);
-    }
+  try {
+    await Product.deleteMany();
+    await User.deleteMany();
+    console.log('Data Destroyed!');
+    process.exit();
+  } catch (error) {
+    console.error(`${error}`);
+    process.exit(1);
+  }
 };
 
 if (process.argv[2] === '-d') {

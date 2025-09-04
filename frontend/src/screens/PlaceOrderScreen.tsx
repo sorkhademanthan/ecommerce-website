@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
-import { useAppSelector } from '../hooks';
+import { useAppDispatch, useAppSelector } from '../hooks';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Message from '../components/Message';
-// For now, the component's only job is to display the summary.
+import Loader from '../components/Loader';
+import { useCreateOrderMutation } from '../slices/ordersApiSlice';
+import { clearCartItems } from '../slices/cartSlice'; // Fix 1: Import clearCartItems
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const cart = useAppSelector((state) => state.cart);
 
-  // Redirect if shipping or payment info is missing
+  const [createOrder, { isLoading, error }] = useCreateOrderMutation();
+
   useEffect(() => {
     if (!cart.shippingAddress?.address) {
       navigate('/shipping');
@@ -18,11 +22,6 @@ const PlaceOrderScreen = () => {
       navigate('/payment');
     }
   }, [cart.paymentMethod, cart.shippingAddress, navigate]);
-
-  const placeOrderHandler = async () => {
-    // This is the placeholder we will build upon in the next step
-    console.log('place order');
-  };
 
   // Calculate prices
   const itemsPrice = cart.cartItems.reduce(
@@ -32,6 +31,30 @@ const PlaceOrderScreen = () => {
   const shippingPrice = itemsPrice > 100 ? 0 : 10;
   const taxPrice = 0.15 * itemsPrice;
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
+
+  const placeOrderHandler = async () => {
+    try {
+      const orderPayload = {
+        orderItems: cart.cartItems.map((i) => ({
+          ...i,
+          product: i._id,
+          image: i.image ?? '/images/placeholder.png',
+        })),
+        shippingAddress: cart.shippingAddress,
+        paymentMethod: cart.paymentMethod,
+        itemsPrice: itemsPrice,
+        taxPrice: taxPrice,
+        shippingPrice: shippingPrice,
+        totalPrice: totalPrice,
+      };
+      const createdOrder = await createOrder(orderPayload).unwrap();
+      dispatch(clearCartItems()); // Fix 2: Dispatch clearCartItems after successful order
+      navigate(`/order/${createdOrder._id}`);
+    } catch (err) {
+      // We'll add a toast notification for this later
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -108,6 +131,15 @@ const PlaceOrderScreen = () => {
                   <Col>${totalPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
+
+              <ListGroup.Item>
+                {error && (
+                  <Message variant="danger">
+                    {'data' in error && (error.data as { message: string }).message}
+                  </Message>
+                )}
+              </ListGroup.Item>
+
               <ListGroup.Item>
                 <Button
                   type="button"
@@ -117,6 +149,7 @@ const PlaceOrderScreen = () => {
                 >
                   Place Order
                 </Button>
+                {isLoading && <Loader />}
               </ListGroup.Item>
             </ListGroup>
           </Card>
