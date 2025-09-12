@@ -1,6 +1,13 @@
 import { apiSlice } from './apiSlice';
 import type{ Order, CreateOrderInput } from '../types'; // 1. Import the specific Order type
 
+interface OrderSummary {
+  salesData: { _id: string; totalSales: number }[];
+  totalOrders: number;
+  totalProducts: number;
+  totalUsers: number;
+}
+
 export const ordersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query<Order[], void>({ // 2. Use Order[] instead of any[]
@@ -28,7 +35,13 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
         body: orderPayload,
       }),
     }),
+    getOrderSummary: builder.query<OrderSummary, void>({
+      query: () => ({
+        url: `/api/orders/summary`,
+      }),
+      keepUnusedDataFor: 5,
+    }),
   }),
 });
 
-export const { useGetOrdersQuery, useGetOrderDetailsQuery, useDeliverOrderMutation, useCreateOrderMutation } = ordersApiSlice;
+export const { useGetOrdersQuery, useGetOrderDetailsQuery, useDeliverOrderMutation, useCreateOrderMutation, useGetOrderSummaryQuery } = ordersApiSlice;

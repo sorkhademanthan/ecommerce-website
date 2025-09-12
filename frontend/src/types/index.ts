@@ -12,6 +12,14 @@ export type Product = {
     numReviews: number;
   };
 
+export type User = {
+    _id: string;
+    name: string;
+    email: string;
+    isAdmin: boolean;
+    token?: string; // Token is optional
+  };
+
 export type CartItem = {
   _id: string;
   name: string;
@@ -72,4 +80,17 @@ export type CreateOrderInput = {
   taxPrice: number;
   shippingPrice: number;
   totalPrice: number;
+};
+
+export type Coupon = {
+  _id: string;
+  code: string;
+  discount: number;
+  expiry: Date;
+  isActive: boolean;
+};
+
+export type Category = {
+  _id: string;
+  name: string;
 };

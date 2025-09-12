@@ -24,6 +24,13 @@ import PlaceOrderScreen from './screens/PlaceOrderScreen.tsx';
 import AdminRoute from './components/AdminRoute.tsx';
 import OrderListScreen from './screens/admin/OrderListScreen.tsx';
 import OrderScreen from './screens/OrderScreen.tsx';
+import ProductListScreen from './screens/admin/ProductListScreen.tsx';
+import ProductEditScreen from './screens/admin/ProductEditScreen.tsx';
+import UserListScreen from './screens/admin/UserListScreen.tsx';
+import UserEditScreen from './screens/admin/UserEditScreen.tsx';
+import DashboardScreen from './screens/admin/DashboardScreen.tsx';
+import CouponListScreen from './screens/admin/CouponListScreen.tsx';
+import CategoryListScreen from './screens/admin/CategoryListScreen.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -49,6 +56,13 @@ const router = createBrowserRouter(
       {/* Admin Routes */}
       <Route path="" element={<AdminRoute />}>
         <Route path="/admin/orderlist" element={<OrderListScreen />} />
+        <Route path="/admin/productlist" element={<ProductListScreen />} />
+        <Route path="/admin/product/:id/edit" element={<ProductEditScreen />} />
+        <Route path="/admin/userlist" element={<UserListScreen />} />
+        <Route path="/admin/user/:id/edit" element={<UserEditScreen />} />
+        <Route path="/admin/dashboard" element={<DashboardScreen />} />
+        <Route path="/admin/couponlist" element={<CouponListScreen />} />
+        <Route path="/admin/categorylist" element={<CategoryListScreen />} />
       </Route>
     </Route>
   )
