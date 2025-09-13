@@ -38,7 +38,7 @@ const userSchema = mongoose.Schema(
     wishlist: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product', // Links to products in their wishlist
+        ref: 'Product',
       },
     ],
     // Fields for password reset functionality

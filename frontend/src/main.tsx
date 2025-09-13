@@ -31,17 +31,21 @@ import UserEditScreen from './screens/admin/UserEditScreen.tsx';
 import DashboardScreen from './screens/admin/DashboardScreen.tsx';
 import CouponListScreen from './screens/admin/CouponListScreen.tsx';
 import CategoryListScreen from './screens/admin/CategoryListScreen.tsx';
+import WishlistScreen from './screens/WishlistScreen.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       {/* Public Routes */}
       <Route index={true} path="/" element={<HomeScreen />} />
+      <Route path="/search/:keyword" element={<HomeScreen />} /> {/* New search route */}
+
       <Route path="/product/:id" element={<ProductScreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/register" element={<RegisterScreen />} />
       <Route path="/cart" element={<CartScreen />} />
       <Route path="" element={<PrivateRoute />}>
+      
     </Route>
 
       {/* Private Routes */}
@@ -51,6 +55,7 @@ const router = createBrowserRouter(
         <Route path='/payment' element={<PaymentScreen/>}/>
         <Route path="/placeorder" element={<PlaceOrderScreen />} />
         <Route path="/order/:id" element={<OrderScreen />} />
+        <Route path="/wishlist" element={<WishlistScreen />} />
       </Route>
 
       {/* Admin Routes */}

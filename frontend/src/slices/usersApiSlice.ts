@@ -1,5 +1,5 @@
 import { apiSlice } from './apiSlice';
-import type{ User } from '../types';
+import type{ User, Product } from '../types';
 
 export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,6 +30,25 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+    getWishlist: builder.query<Product[], void>({
+      query: () => '/api/users/wishlist',
+      providesTags: ['Wishlist'],
+    }),
+    addToWishlist: builder.mutation<{ message: string }, { productId: string }>({
+      query: ({ productId }) => ({
+        url: '/api/users/wishlist',
+        method: 'POST',
+        body: { productId },
+      }),
+      invalidatesTags: ['Wishlist'],
+    }),
+    removeFromWishlist: builder.mutation<{ message: string }, { productId: string }>({
+      query: ({ productId }) => ({
+        url: `/api/users/wishlist/${productId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Wishlist'],
+    }),
   }),
 });
 
@@ -38,4 +57,7 @@ export const {
   useDeleteUserMutation,
   useGetUserDetailsQuery, // Export new hook
   useUpdateUserMutation,   // Export new hook
+  useGetWishlistQuery,
+  useAddToWishlistMutation,
+  useRemoveFromWishlistMutation,
 } = usersApiSlice;

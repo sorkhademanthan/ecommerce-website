@@ -1,12 +1,22 @@
 import { apiSlice } from './apiSlice';
 import type{ Product } from '../types';
 
+interface GetProductsParams {
+  keyword?: string;
+  category?: string;
+}
+
 export const productsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query<Product[], void>({
-      query: () => ({
-        url: '/api/products',
-      }),
+    getProducts: builder.query<Product[], GetProductsParams>({
+      query: ({ keyword, category }) => {
+        const params = new URLSearchParams();
+        if (keyword) params.append('keyword', keyword);
+        if (category) params.append('category', category);
+        return {
+          url: `/api/products?${params.toString()}`,
+        };
+      },
       providesTags: ['Product'],
       keepUnusedDataFor: 5,
     }),
@@ -38,6 +48,14 @@ export const productsApiSlice = apiSlice.injectEndpoints({
         }),
         invalidatesTags: ['Product'],
     }),
+    createReview: builder.mutation<{ message: string }, { productId: string; rating: number; comment: string }>({
+      query: (data) => ({
+        url: `/api/products/${data.productId}/reviews`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Product'],
+    }),
     uploadProductImage: builder.mutation<{ imageUrl: string; message: string }, FormData>({
         query: (data) => ({
           url: `/api/upload`,
@@ -55,4 +73,5 @@ export const {
   useDeleteProductMutation,
   useUpdateProductMutation,
   useUploadProductImageMutation,
+  useCreateReviewMutation,
 } = productsApiSlice;

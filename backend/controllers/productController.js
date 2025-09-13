@@ -1,12 +1,31 @@
 // CORRECT
 import Product from '../models/productModel.js';// Corrected import path
 
-// @desc    Fetch all products
+// @desc    Fetch all products with optional filtering
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
-  const products = await Product.find({});
-  res.json(products);
+  const { keyword, category } = req.query;
+
+  const query = {};
+
+  if (keyword) {
+    query.name = {
+      $regex: keyword,
+      $options: 'i', // 'i' for case-insensitive
+    };
+  }
+
+  if (category) {
+    query.category = category;
+  }
+
+  try {
+    const products = await Product.find(query);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
 // @desc    Fetch a single product
@@ -74,4 +93,42 @@ const updateProduct = async (req, res) => {
   }
 };
 
-export { getProducts, getProductById, createProduct, deleteProduct, updateProduct };
+
+// @desc    Create a new review
+// @route   POST /api/products/:id/reviews
+// @access  Private
+const createProductReview = async (req, res) => {
+  const { rating, comment } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyReviewed) {
+      res.status(400).json({ message: 'Product already reviewed' });
+      return;
+    }
+
+    const review = {
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+      user: req.user._id,
+    };
+
+    product.reviews.push(review);
+    product.numReviews = product.reviews.length;
+    product.rating =
+      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      product.reviews.length;
+
+    await product.save();
+    res.status(201).json({ message: 'Review added' });
+  } else {
+    res.status(404).json({ message: 'Product not found' });
+  }
+};
+
+export { getProducts, getProductById, createProduct, deleteProduct, updateProduct, createProductReview, };

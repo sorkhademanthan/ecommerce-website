@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { FaShoppingCart, FaUser } from 'react-icons/fa';
-// @ts-expect-error: react-router-bootstrap does not have TypeScript types
 import { LinkContainer } from 'react-router-bootstrap'; // Use this for better routing with React Bootstrap
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { logout } from '../slices/authSlice';
+import SearchBox from './SearchBox';
 
 const Header: React.FC = () => {
   const { userInfo } = useAppSelector((state) => state.auth);
@@ -24,6 +24,7 @@ const Header: React.FC = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <SearchBox />
               <LinkContainer to="/cart">
                 <Nav.Link><FaShoppingCart /> Cart</Nav.Link>
               </LinkContainer>
