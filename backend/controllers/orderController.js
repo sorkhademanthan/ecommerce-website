@@ -16,6 +16,8 @@ const addOrderItems = async (req, res) => {
       shippingPrice,
       totalPrice,
     } = req.body;
+    
+    
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({ message: 'No order items' });
@@ -56,6 +58,7 @@ const addOrderItems = async (req, res) => {
     });
 
     const createdOrder = await order.save();
+    req.io.emit('newOrder', createdOrder);
     res.status(201).json(createdOrder);
   } catch (err) {
     const message = err?.message || 'Failed to create order';

@@ -5,24 +5,25 @@ import Product from '../models/productModel.js';// Corrected import path
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
+  const pageSize = 4; // Set number of products per page
+  const page = Number(req.query.pageNumber) || 1;
   const { keyword, category } = req.query;
 
   const query = {};
-
   if (keyword) {
-    query.name = {
-      $regex: keyword,
-      $options: 'i', // 'i' for case-insensitive
-    };
+    query.name = { $regex: keyword, $options: 'i' };
   }
-
   if (category) {
     query.category = category;
   }
 
   try {
-    const products = await Product.find(query);
-    res.json(products);
+    const count = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
+    res.json({ products, page, pages: Math.ceil(count / pageSize) });
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
   }
@@ -131,4 +132,32 @@ const createProductReview = async (req, res) => {
   }
 };
 
-export { getProducts, getProductById, createProduct, deleteProduct, updateProduct, createProductReview, };
+// ... existing functions
+
+// @desc    Get product recommendations
+// @route   GET /api/products/:id/recommendations
+// @access  Public
+const getProductRecommendations = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+
+    // Find products in the same category, excluding the current product, and limit to 4
+    const recommendations = await Product.find({
+      category: product.category,
+      _id: { $ne: product._id }, // $ne means "not equal to"
+    }).limit(4);
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+
+export { getProducts, getProductById, createProduct, deleteProduct, updateProduct, createProductReview, getProductRecommendations };

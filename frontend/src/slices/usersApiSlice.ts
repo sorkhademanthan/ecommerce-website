@@ -49,6 +49,20 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Wishlist'],
     }),
+    forgotPassword: builder.mutation<{ message: string }, { email: string }>({
+      query: (data) => ({
+        url: '/api/users/forgot-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    resetPassword: builder.mutation<{ message: string }, { token: string; password: string }>({
+      query: (data) => ({
+        url: `/api/users/reset-password/${data.token}`,
+        method: 'PUT',
+        body: { password: data.password },
+      }),
+    }),
   }),
 });
 
@@ -60,4 +74,6 @@ export const {
   useGetWishlistQuery,
   useAddToWishlistMutation,
   useRemoveFromWishlistMutation,
+  useForgotPasswordMutation, 
+  useResetPasswordMutation
 } = usersApiSlice;

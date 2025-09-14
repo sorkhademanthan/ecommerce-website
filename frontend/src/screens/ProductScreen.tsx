@@ -5,13 +5,16 @@ import { FaHeart } from 'react-icons/fa';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Rating from '../components/Rating';
+import Meta from '../components/Meta';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
+  useGetProductRecommendationsQuery,
 } from '../slices/productsApiSlice';
 import { useAddToWishlistMutation } from '../slices/usersApiSlice';
 import { addToCart } from '../slices/cartSlice';
+import Product from '../components/Product';
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
@@ -80,6 +83,12 @@ const ProductScreen = () => {
     }
   };
 
+  const {
+    data: recommendations,
+    isLoading: loadingRecommendations,
+    error: errorRecommendations,
+  } = useGetProductRecommendationsQuery(productId!);
+
   return (
     <>
       <Link className="btn btn-light my-3" to="/">
@@ -94,6 +103,13 @@ const ProductScreen = () => {
       ) : (
         product && (
           <>
+            <Meta
+              title={product.name}
+              description={product.description}
+            />
+            <Link className="btn btn-light my-3" to="/">
+              Go Back
+            </Link>
             {/* --- Product Details and Add to Cart Section --- */}
             <Row>
               <Col md={5}>
@@ -154,6 +170,26 @@ const ProductScreen = () => {
                     )}
                   </ListGroup>
                 </Card>
+              </Col>
+            </Row>
+
+            {/* --- Recommendations Section --- */}
+            <Row className="mt-5">
+              <Col>
+                <h2>You Might Also Like</h2>
+                {loadingRecommendations ? (
+                  <Loader />
+                ) : errorRecommendations ? (
+                  <Message variant="danger">Could not fetch recommendations</Message>
+                ) : (
+                  <Row>
+                    {recommendations?.map((recProduct) => (
+                      <Col key={recProduct._id} sm={12} md={6} lg={4} xl={3}>
+                        <Product product={recProduct} />
+                      </Col>
+                    ))}
+                  </Row>
+                )}
               </Col>
             </Row>
 

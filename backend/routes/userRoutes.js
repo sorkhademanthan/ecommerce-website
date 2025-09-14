@@ -13,6 +13,8 @@ import {
   addToWishlist,
   removeFromWishlist,
   getWishlist,
+  forgotPassword, 
+  resetPassword,  
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { admin } from '../middleware/adminMiddleware.js';
@@ -34,5 +36,8 @@ router
   .delete(protect, admin, deleteUser)
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUser);
+
+router.post('/forgot-password', forgotPassword);
+;router.put('/reset-password/:token', resetPassword);
 
 export default router;

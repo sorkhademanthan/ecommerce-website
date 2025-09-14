@@ -1,16 +1,17 @@
 import { Row, Col } from 'react-bootstrap';
-import { useParams } from 'react-router-dom'; // 1. Import useParams
+import { useParams } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Product from '../components/Product';
-import { useGetProductsQuery } from '../slices/productsApiSlice'; // 2. Use the correct RTK Query hook
+import Paginate from '../components/Paginate'; // Import Paginate
+import { useGetProductsQuery } from '../slices/productsApiSlice';
 
 const HomeScreen = () => {
-  // 3. Get the keyword from the URL parameters
-  const { keyword } = useParams();
-
-  // 4. Call the hook with the keyword. RTK Query handles the rest.
-  const { data: products, isLoading, error } = useGetProductsQuery({ keyword });
+  const { pageNumber, keyword } = useParams();
+  const { data, isLoading, error } = useGetProductsQuery({
+    keyword,
+    pageNumber: Number(pageNumber) || 1,
+  });
 
   return (
     <>
@@ -20,18 +21,25 @@ const HomeScreen = () => {
         <Message variant="danger">
           {'data' in error && (error.data as { message: string }).message}
         </Message>
-      ) : (
+      ) : data ? (
         <>
           <h1>Latest Products</h1>
           <Row>
-            {products?.map((product) => (
-              <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
+            {data.products.map((product) => (
+              <Col key={product._id} xs={12} sm={6} md={4} lg={3} xl={3}>
                 <Product product={product} />
               </Col>
             ))}
           </Row>
+          <div className="d-flex justify-content-center mt-4">
+            <Paginate
+              pages={data.pages}
+              page={data.page}
+              keyword={keyword ? keyword : ''}
+            />
+          </div>
         </>
-      )}
+      ) : null}
     </>
   );
 };

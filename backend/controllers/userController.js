@@ -1,6 +1,7 @@
 import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -214,5 +215,60 @@ const getWishlist = async (req, res) => {
   }
 };
 
+// @desc    Request password reset
+// @route   POST /api/users/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try { // Add a try...catch block around the whole function
+    const { email } = req.body;
+    const user = await User.findOne({ email });
 
-export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser, getWishlist, addToWishlist, removeFromWishlist };
+    if (!user) {
+      return res.status(200).json({ message: 'If a user with that email exists, a reset link has been sent.' });
+    }
+
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10m' });
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    });
+
+    await transporter.sendMail({
+      to: user.email,
+      subject: 'Password Reset Request',
+      html: `<p>Please click the following link to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
+    });
+
+    res.json({ message: 'If a user with that email exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('FORGOT PASSWORD ERROR:', error); // Log the actual error on the server
+    res.status(500).json({ message: 'Error sending email. Please try again later.' });
+  }
+};
+
+// @desc    Reset password
+// @route   PUT /api/users/reset-password/:token
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    await user.save();
+
+    res.json({ message: 'Password has been reset successfully' });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
+
+
+export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser, getWishlist, addToWishlist, removeFromWishlist, forgotPassword, resetPassword,  };

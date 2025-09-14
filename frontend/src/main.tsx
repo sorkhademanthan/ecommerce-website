@@ -32,20 +32,23 @@ import DashboardScreen from './screens/admin/DashboardScreen.tsx';
 import CouponListScreen from './screens/admin/CouponListScreen.tsx';
 import CategoryListScreen from './screens/admin/CategoryListScreen.tsx';
 import WishlistScreen from './screens/WishlistScreen.tsx';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen.tsx';
+import ResetPasswordScreen from './screens/ResetPasswordScreen.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       {/* Public Routes */}
       <Route index={true} path="/" element={<HomeScreen />} />
-      <Route path="/search/:keyword" element={<HomeScreen />} /> {/* New search route */}
+      <Route path="/page/:pageNumber" element={<HomeScreen />} /> 
+      <Route path="/search/:keyword" element={<HomeScreen />} /> 
+      <Route path="/search/:keyword/page/:pageNumber" element={<HomeScreen />} /> 
 
       <Route path="/product/:id" element={<ProductScreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/register" element={<RegisterScreen />} />
       <Route path="/cart" element={<CartScreen />} />
-      <Route path="" element={<PrivateRoute />}>
-      
+      <Route path="" element={<PrivateRoute />}>   
     </Route>
 
       {/* Private Routes */}
@@ -56,6 +59,8 @@ const router = createBrowserRouter(
         <Route path="/placeorder" element={<PlaceOrderScreen />} />
         <Route path="/order/:id" element={<OrderScreen />} />
         <Route path="/wishlist" element={<WishlistScreen />} />
+        <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordScreen />} />
       </Route>
 
       {/* Admin Routes */}

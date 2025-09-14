@@ -4,15 +4,24 @@ import type{ Product } from '../types';
 interface GetProductsParams {
   keyword?: string;
   category?: string;
+  pageNumber?: number; // Add pageNumber
+}
+
+// Define the shape of the paginated response
+interface PaginatedProducts {
+  products: Product[];
+  page: number;
+  pages: number;
 }
 
 export const productsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query<Product[], GetProductsParams>({
-      query: ({ keyword, category }) => {
+    getProducts: builder.query<PaginatedProducts, GetProductsParams>({
+      query: ({ keyword, category, pageNumber } = {}) => {
         const params = new URLSearchParams();
         if (keyword) params.append('keyword', keyword);
         if (category) params.append('category', category);
+        if (pageNumber) params.append('pageNumber', String(pageNumber));
         return {
           url: `/api/products?${params.toString()}`,
         };
@@ -56,6 +65,12 @@ export const productsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Product'],
     }),
+    getProductRecommendations: builder.query<Product[], string>({
+      query: (productId) => ({
+        url: `/api/products/${productId}/recommendations`,
+      }),
+      keepUnusedDataFor: 5,
+    }),
     uploadProductImage: builder.mutation<{ imageUrl: string; message: string }, FormData>({
         query: (data) => ({
           url: `/api/upload`,
@@ -74,4 +89,5 @@ export const {
   useUpdateProductMutation,
   useUploadProductImageMutation,
   useCreateReviewMutation,
+  useGetProductRecommendationsQuery,
 } = productsApiSlice;
