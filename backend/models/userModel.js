@@ -23,12 +23,15 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     isAdmin: {
       type: Boolean,
       required: true,
       default: false,
+    },
+    avatar: { 
+      type: String 
     },
     // New, more advanced fields
     phoneNumber: {

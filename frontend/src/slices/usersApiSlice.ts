@@ -63,6 +63,11 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: { password: data.password },
       }),
     }),
+    getMe: builder.query<User, void>({
+      query: () => ({
+        url: '/api/users/profile',
+      }),
+    }),
   }),
 });
 
@@ -74,6 +79,8 @@ export const {
   useGetWishlistQuery,
   useAddToWishlistMutation,
   useRemoveFromWishlistMutation,
-  useForgotPasswordMutation, 
-  useResetPasswordMutation
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+  useGetMeQuery,
+  
 } = usersApiSlice;

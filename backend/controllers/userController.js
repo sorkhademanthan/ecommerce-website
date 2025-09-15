@@ -7,27 +7,27 @@ import nodemailer from 'nodemailer';
 // @route   POST /api/users/login
 // @access  Public
 const authUser = async (req, res) => {
-  // NOTE: We need express.json() middleware in server.js for this to work
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
 
   if (user && (await bcrypt.compare(password, user.password))) {
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
-    });
+    // Call the helper to set the cookie
+    generateToken(res, user._id);
 
+    // Send back user data WITHOUT the token
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
-      token: token,
+      avatar: user.avatar,
     });
   } else {
     res.status(401).json({ message: 'Invalid email or password' });
   }
 };
+
 
 // @desc    Register a new user
 // @route   POST /api/users
@@ -51,9 +51,9 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: '30d',
-        });
+        if (user && (await bcrypt.compare(password, user.password))) {
+        generateToken(res, user._id);
+        }
         res.status(201).json({
             _id: user._id,
             name: user.name,
@@ -153,19 +153,15 @@ const updateUserProfile = async (req, res) => {
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
-      
+      user.avatar = req.body.avatar || user.avatar;
+
       if (req.body.password) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(req.body.password, salt);
       }
 
       const updatedUser = await user.save();
-      res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        isAdmin: updatedUser.isAdmin,
-      });
+      res.status(200).json(updatedUser);
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -270,5 +266,18 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Helper function to set the JWT cookie
+const generateToken = (res, userId) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: '30d',
+  });
 
-export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser, getWishlist, addToWishlist, removeFromWishlist, forgotPassword, resetPassword,  };
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: 'strict',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+};
+
+export {authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser, getWishlist, addToWishlist, removeFromWishlist, forgotPassword, resetPassword, generateToken };

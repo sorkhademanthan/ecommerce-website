@@ -8,6 +8,10 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import './config/passport.js';
 
 connectDB();
 
@@ -32,6 +36,8 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 });
+
+app.use(cookieParser());
 
 // Middleware to attach io instance
 app.use((req, res, next) => {

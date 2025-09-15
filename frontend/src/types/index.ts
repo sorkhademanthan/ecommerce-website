@@ -21,15 +21,26 @@ export type Product = {
     rating: number;
     numReviews: number;
     reviews: Review[]; 
-  };
+};
+
+export type UserInfo = {
+  _id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  token?: string;
+  avatar?: string; // <-- Add this line
+};
 
 export type User = {
-    _id: string;
-    name: string;
-    email: string;
-    isAdmin: boolean;
-    token?: string; // Token is optional
-  };
+  _id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  token?: string;
+  avatar?: string;
+  password?: string;
+};
 
 export type CartItem = {
   _id: string;

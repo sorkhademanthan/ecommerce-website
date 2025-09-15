@@ -6,6 +6,7 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import { useAppDispatch, useAppSelector } from '../hooks'; // <-- Fix 1: Use custom typed hooks
 import { login } from '../slices/authSlice';
+import { FaGoogle } from 'react-icons/fa';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -63,6 +64,15 @@ const LoginScreen = () => {
           Sign In
         </Button>
       </Form>
+      <div className="d-grid gap-2 mt-3">
+        <Button
+          as="a"
+          href="/api/users/auth/google"
+          variant="outline-danger"
+        >
+          <FaGoogle className="me-2" /> Sign In with Google
+        </Button>
+      </div>
       <Row className="py-3">
         <Col>
           New Customer? <Link to={`/register?redirect=${encodeURIComponent(redirect)}`}>Register</Link>

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Image } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
-import { useAppSelector, useAppDispatch } from '../hooks';
-import { updateUserProfile } from '../slices/authSlice';
+import Loader from '../components/Loader';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { useUpdateUserMutation } from '../slices/usersApiSlice'; // Corrected hook name
+import { useUploadProductImageMutation } from '../slices/productsApiSlice';
+import { setCredentials } from '../slices/authSlice';
 
 const ProfileScreen = () => {
   const [name, setName] = useState('');
@@ -13,84 +16,91 @@ const ProfileScreen = () => {
   const dispatch = useAppDispatch();
   const { userInfo } = useAppSelector((state) => state.auth);
 
+  const [updateProfile, { isLoading: loadingUpdate }] = useUpdateUserMutation();
+  const [uploadProductImage, { isLoading: loadingUpload }] = useUploadProductImageMutation();
+
   useEffect(() => {
-    // Pre-fill the form with the logged-in user's data
     if (userInfo) {
       setName(userInfo.name);
       setEmail(userInfo.email);
     }
   }, [userInfo]);
 
-  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      // We'll add a better notification (toast) later
       alert('Passwords do not match');
     } else {
-      // Fix: import and use dispatch and updateUserProfile
-      // Import useDispatch and updateUserProfile at the top of the file:
-      // import { useDispatch } from 'react-redux';
-      // import { updateUserProfile } from '../slices/userSlice';
-      // Now dispatch the action:
-      // Only include password if it is not empty
-      const updateData: { name: string; email: string; password?: string } = { name, email };
-      if (password) {
-        updateData.password = password;
+      try {
+        const res = await updateProfile({
+          _id: userInfo?._id,
+          name,
+          email,
+          password,
+        }).unwrap();
+        dispatch(setCredentials(res));
+        alert('Profile updated successfully');
+      } catch (err) {
+        console.error(err);
       }
-      dispatch(updateUserProfile(updateData));
-      // We can add a "Profile Updated!" success message here later
-      // (Make sure to define and use dispatch properly)
     }
   };
-   
+
+  const uploadFileHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formData = new FormData();
+    if (e.target.files) {
+      formData.append('image', e.target.files[0]);
+      formData.append('folder', 'avatars');
+      try {
+        const res = await uploadProductImage(formData).unwrap();
+        const updateRes = await updateProfile({
+          _id: userInfo?._id,
+          avatar: res.imageUrl,
+        }).unwrap();
+        dispatch(setCredentials(updateRes));
+        alert('Avatar updated');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   return (
     <FormContainer>
       <h1>User Profile</h1>
+      <div className="text-center my-3">
+        <Image src={userInfo?.avatar || '/images/default-avatar.png'} roundedCircle width={150} height={150} />
+      </div>
+      <Form.Group controlId="avatar" className="my-3">
+        <Form.Label>Change Avatar</Form.Label>
+        <Form.Control type="file" onChange={uploadFileHandler} />
+        {loadingUpload && <Loader />}
+      </Form.Group>
+
       <Form onSubmit={submitHandler}>
-        <Form.Group className="my-2" controlId="name">
+        <Form.Group controlId="name" className="my-2">
           <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          ></Form.Control>
+          <Form.Control type="text" placeholder="Enter name" value={name} onChange={(e) => setName(e.target.value)} />
         </Form.Group>
-
-        <Form.Group className="my-2" controlId="email">
+        <Form.Group controlId="email" className="my-2">
           <Form.Label>Email Address</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></Form.Control>
+          <Form.Control type="email" placeholder="Enter email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </Form.Group>
-
-        <Form.Group className="my-2" controlId="password">
+        
+        {/* Added missing password fields */}
+        <Form.Group controlId="password"  className="my-2">
           <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter new password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          ></Form.Control>
+          <Form.Control type="password" placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Form.Group>
-
-        <Form.Group className="my-2" controlId="confirmPassword">
+        <Form.Group controlId="confirmPassword"  className="my-2">
           <Form.Label>Confirm Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Confirm new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          ></Form.Control>
+          <Form.Control type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
         </Form.Group>
-
+        
         <Button type="submit" variant="primary" className="mt-2">
-          Update
+          Update Profile
         </Button>
+        {loadingUpdate && <Loader />}
       </Form>
     </FormContainer>
   );

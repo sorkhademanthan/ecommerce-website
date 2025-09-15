@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useAppSelector } from './hooks';
+import Startup from './components/Startup';
 
 const App = () => {
   const { userInfo } = useAppSelector((state) => state.auth);
@@ -28,6 +29,7 @@ const App = () => {
 
   return (
     <>
+      <Startup />
       <Header />
       <main className="py-3">
         <Container>

@@ -8,6 +8,7 @@ export interface UserInfo {
   email: string;
   isAdmin: boolean;
   token: string;
+  avatar?: string;
 }
 
 // Helper function to get user info from localStorage
@@ -84,6 +85,10 @@ const authSlice = createSlice({
       state.userInfo = null;
       localStorage.removeItem('userInfo');
     },
+    setCredentials: (state, action) => {
+      state.userInfo = action.payload;
+      localStorage.setItem('userInfo', JSON.stringify(action.payload));
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -158,5 +163,5 @@ export const updateUserProfile = createAsyncThunk<
   }
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setCredentials } = authSlice.actions;
 export default authSlice.reducer;
